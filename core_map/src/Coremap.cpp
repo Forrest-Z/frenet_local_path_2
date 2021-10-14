@@ -50,6 +50,7 @@ Coremap::Coremap(ros::NodeHandle _nh) : tf_listener(tf_buffer)
 
     clicked_point_sub = nh.subscribe("/move_base_simple/goal", 1, &Coremap::clickedPointCallback, this);
     v2x_clear_sub = nh.subscribe("/core/control/mission_state", 1, &Coremap::missionStateCallback, this);
+    
     if (runType == BAG_TEST)
     {
        wave_sub = nh.subscribe("/core/v2x/wave_packet", 1, &Coremap::waveCallback, this);
@@ -94,7 +95,7 @@ Coremap::Coremap(ros::NodeHandle _nh) : tf_listener(tf_buffer)
     frontIrrSrv = nh.advertiseService("/core/map/front_irr_srv", &Coremap::srvFrontIrr, this);
 
     std::string mapPath;
-    nh.param<std::string>("/hdmap_path", mapPath, "/home/a/lc_ws/src/core_map/HDMAP");
+    nh.param<std::string>("/hdmap_path", mapPath, "/home/a/k_city_ws/src/core_map/HDMAP");
 
     std::string daguePath = mapPath + std::string("/K-City");
     hdmap.readHDMap(daguePath);

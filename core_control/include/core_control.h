@@ -28,9 +28,10 @@
 #include <polygon_msgs/polygonArray.h>
 
 //PCL
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-#include <pcl_conversions/pcl_conversions.h>
+//#include <pcl/point_cloud.h>
+//#include <pcl/point_types.h>
+//#include <pcl_conversions/pcl_conversions.h>
+#include "pcl_ros/point_cloud.h"
 
 //Novatel
 #include <novatel_gps_msgs/NovatelPosition.h>
@@ -63,6 +64,10 @@
 /// PCAN
 #include "PCANBasic.h"
 
+#include "core_map/frenet_input.h"
+#include "core_map/frenet_output.h"
+#include "core_map/frenet_obstacle.h"
+
 const std::string kTopicObstacles = "/obj_data";
 const std::string kTopicMissionState = "/core/control/mission_state";
 const std::string kTopicAvanteData = "/core/control/avante_data";
@@ -75,6 +80,9 @@ const std::string kTopicGlobalPath = "/core/map/global_path";
 const std::string kTopicFsmMission = "/core/map/mission_fsm";
 const std::string kTopicTrafficInfo = "/core/v2x/traffic_signal";
 const std::string kTopicIrregular = "/core/v2x/irregular_loc";
+
+const std::string kTopicfrenetInput = "/core/control/frenet_path_input";
+const std::string kTopicfrenetpath = "/core/frenet/result";
 
 const std::string kSrvicePathEmergency = "/core/map/emergency_path_srv";
 const std::string kSrviceCheckProfit = "/core/map/check_profit_srv";
@@ -193,6 +201,8 @@ private:
     MissionState mission_state;
     std_msgs::Int8 msg_mission_state;
     ros::Publisher pub_mission_state;
+    ros::Publisher pub_frenet_state;
+    ros::Subscriber sub_frenet_path;
     ros::Subscriber sub_path_global_lic;
     ros::Subscriber sub_path_global_dague;
     ros::ServiceClient client_path_global;
@@ -310,6 +320,10 @@ private:
     double max_look_ahead_distance;
 
 public:
+
+    void get_frenet_path();
+    void callbackfrenetpath(const core_map::frenet_output &msg);
+
     // Behavior Tree 대응 함수
     // Check 함수
 
@@ -332,7 +346,6 @@ public:
     bool btCheckPassAbleTrafficLight();
     bool btCheckGlobalLaneChange();
     bool btCheckLeftChange();
-    bool btCheckRightChange();
     bool btCheckExistPathGlobal();
     // 차선유지 state 체크
     bool btCheckStateLaneKeeping();

@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   message_generation
+  core_control
 )
 
 add_message_files(
@@ -29,6 +30,10 @@ add_message_files(
     traffic_light.msg
     traffic_light_info.msg
     links.msg
+
+    frenet_input.msg
+    frenet_output.msg
+    frenet_obstacle.msg
 )
  
 add_service_files(
@@ -100,3 +105,4 @@ target_link_libraries(
 )
 
 add_dependencies(core_map_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp)
+
