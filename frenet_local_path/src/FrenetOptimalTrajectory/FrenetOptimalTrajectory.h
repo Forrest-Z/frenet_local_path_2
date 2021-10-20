@@ -69,6 +69,7 @@ private:
     CubicSpline2D *csp;
     vector<Obstacle *> obstacles;
     char frenet_state;
+    bool is_global_changed = false;
 
 //    vector<double> x, y;
     vector<double> llx, lly, urx,ury; // obstacle lower left x , lower left y , upper right x, upper right y

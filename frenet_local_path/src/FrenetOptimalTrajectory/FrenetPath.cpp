@@ -4,7 +4,7 @@
 #include <algorithm>
 
 const float COLLISION_CHECK_THRESHOLD = 8; // don't check unless within 6m
-const float SAFETY_DISTANCE_THRESHOLD = 4;
+const float SAFETY_DISTANCE_THRESHOLD = 2;
 FrenetPath::FrenetPath(FrenetHyperparameters *fot_hp_) {
     fot_hp = fot_hp_;
 }
@@ -105,7 +105,7 @@ bool FrenetPath::is_collision(const vector<Obstacle *> obstacles) {
         //        double urx = obstacle->bbox.second.x();
         //        double ury = obstacle->bbox.second.y();
 
-        for (size_t i = 0; i < x.size(); i++) {
+        for (size_t i = 2; i < x.size(); i++) {
             vector<double> dis;
             //            double d1 = norm(llx - x[i], lly - y[i]);
             //            double d2 = norm(llx - x[i], ury - y[i]);
@@ -117,7 +117,12 @@ bool FrenetPath::is_collision(const vector<Obstacle *> obstacles) {
             double closest = *min_element(dis.begin(), dis.end());
             // only check for collision if one corner of bounding box is
             // within COLLISION_CHECK_THRESHOLD of waypoint
-            if (closest <= COLLISION_CHECK_THRESHOLD && closest >=SAFETY_DISTANCE_THRESHOLD) {
+            if(closest <= obstacle->min_distance_to_path){
+                obstacle->min_distance_to_path = closest;
+                tmp = closest; // for debug
+            }
+
+            if (closest <= COLLISION_CHECK_THRESHOLD && closest >=SAFETY_DISTANCE_THRESHOLD) {//&&
                 double xp = x[i];
                 double yp = y[i];
                 double yawp = yaw[i];
@@ -139,7 +144,7 @@ bool FrenetPath::is_collision(const vector<Obstacle *> obstacles) {
                 }
             }
             else if (closest <= SAFETY_DISTANCE_THRESHOLD){
-                return false;
+                return true;
             }
 
 
@@ -159,20 +164,21 @@ FrenetPath::inverse_distance_to_obstacles(
     double total_inverse_distance = 0.0;
 
     for (auto obstacle : obstacles) {
-        double llx = obstacle->bbox.first.x();
-        double lly = obstacle->bbox.first.y();
-        double urx = obstacle->bbox.second.x();
-        double ury = obstacle->bbox.second.y();
+//        double llx = obstacle->bbox.first.x();
+//        double lly = obstacle->bbox.first.y();
+//        double urx = obstacle->bbox.second.x();
+//        double ury = obstacle->bbox.second.y();
 
-        for (size_t i = 0; i < x.size(); i++) {
-            double d1 = norm(llx - x[i], lly - y[i]);
-            double d2 = norm(llx - x[i], ury - y[i]);
-            double d3 = norm(urx - x[i], ury - y[i]);
-            double d4 = norm(urx - x[i], lly - y[i]);
+//        for (size_t i = 0; i < x.size(); i++) {
+//            double d1 = norm(llx - x[i], lly - y[i]);
+//            double d2 = norm(llx - x[i], ury - y[i]);
+//            double d3 = norm(urx - x[i], ury - y[i]);
+//            double d4 = norm(urx - x[i], lly - y[i]);
 
-            double closest = min({d1, d2, d3, d4});
-            total_inverse_distance += 1.0 / closest;
-        }
+//            double closest = min({d1, d2, d3, d4});
+//            total_inverse_distance += 1.0 / closest;
+//        }
+        total_inverse_distance += 1.0 / obstacle->min_distance_to_path;
     }
     return total_inverse_distance;
 }

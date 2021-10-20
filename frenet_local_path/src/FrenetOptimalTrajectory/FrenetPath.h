@@ -59,7 +59,7 @@ public:
     // final cost
     double cf = 0.0;
 
-    double tmp = 0.0;
+    double tmp = 9999;
 
     FrenetPath(FrenetHyperparameters *fot_hp_);
     bool to_global_path(CubicSpline2D* csp);
