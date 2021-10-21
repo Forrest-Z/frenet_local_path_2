@@ -6,7 +6,7 @@ using namespace std;
 FrenetHyperparameters frenet_path_hp = {
     20.0, //max_speed
     5.0, //max_accel
-    25.0, //max_curvature
+    15.0, //max_curvature
     0.0, //max_road_width_l (float): maximum road width to the left [m]
     5.0, //max_road_width_r (float): maximum road width to the right [m]
     0.5, //d_road_w (float): road width sampling discretization [m]
@@ -16,7 +16,7 @@ FrenetHyperparameters frenet_path_hp = {
     1, //d_t_s (float): target speed sampling discretization [m/s]
     1.0, //n_s_sample (float): sampling number of target speed
     1.0, //obstacle_clearance (float): obstacle radius [m]
-    1, //kd (float): positional deviation cost
+    0.5, //kd (float): positional deviation cost
     0.1, //kv (float): velocity cost
     0.1, //ka (float): acceleration cost
     0.1, //kj (float): acceleration cost
@@ -236,10 +236,10 @@ void FrenetOptimalTrajectory::FrenetInitialConditionsCallback(const frenet_local
 //                 best_frenet_path->x.push_back(msg.waypointAry[idx+1].x);
 //                 best_frenet_path->y.push_back(msg.waypointAry[idx+1].y);
 //             }
-            if (frenet_state == 1 && best_frenet_path->c_lateral_deviation <=30)
+            if (frenet_state == 1 && best_frenet_path->c_lateral_deviation <=10)
                 frenet_state = 0;
 
-            fprintf(stderr, "Sucess, runtime : %lf sec, s : %lf, frenet_state: %d, closest: %lf \n", run_time, s, frenet_state, best_frenet_path->c_lateral_deviation);
+            fprintf(stderr, "Sucess, runtime : %lf sec, s : %lf, frenet_state: %d, closest: %lf, size: %d, c_lateral: %lf \n", run_time, s, frenet_state, best_frenet_path->tmp, best_frenet_path->x.size(), best_frenet_path->c_lateral_deviation);
 //            if (best_frenet_path->tmp < 4)
 //                best_frenet_path->is_valid_path(obstacles);
 

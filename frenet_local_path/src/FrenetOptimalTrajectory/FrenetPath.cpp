@@ -105,7 +105,7 @@ bool FrenetPath::is_collision(const vector<Obstacle *> obstacles) {
         //        double urx = obstacle->bbox.second.x();
         //        double ury = obstacle->bbox.second.y();
 
-        for (size_t i = 2; i < x.size(); i++) {
+        for (size_t i = 15; i < x.size(); i++) {
             vector<double> dis;
             //            double d1 = norm(llx - x[i], lly - y[i]);
             //            double d2 = norm(llx - x[i], ury - y[i]);
@@ -121,8 +121,11 @@ bool FrenetPath::is_collision(const vector<Obstacle *> obstacles) {
                 obstacle->min_distance_to_path = closest;
                 tmp = closest; // for debug
             }
+            if (closest <= SAFETY_DISTANCE_THRESHOLD){
+                return true;
+            }
 
-            if (closest <= COLLISION_CHECK_THRESHOLD && closest >=SAFETY_DISTANCE_THRESHOLD) {//&&
+            else if (closest <= COLLISION_CHECK_THRESHOLD && closest >=SAFETY_DISTANCE_THRESHOLD) {//&&
                 double xp = x[i];
                 double yp = y[i];
                 double yawp = yaw[i];
@@ -142,9 +145,6 @@ bool FrenetPath::is_collision(const vector<Obstacle *> obstacles) {
                     // contain the ego vehicle, otherwise any point contained will
                     // form a line segment that intersects the obstacle
                 }
-            }
-            else if (closest <= SAFETY_DISTANCE_THRESHOLD){
-                return true;
             }
 
 
