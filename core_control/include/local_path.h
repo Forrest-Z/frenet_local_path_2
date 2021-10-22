@@ -189,7 +189,10 @@ private:
     std::vector<UnprotectedLink> unprotected_right;
 
 public:
+    ros::Time frenet_start = ros::Time::now();
+    ros::Time frenet_time = ros::Time::now();
     char frenet_state = 0;
+    char pre_frenet_state = 0;
     LocalPath();
     ~LocalPath();
 
@@ -317,6 +320,8 @@ public:
     bool tickCheckGlobalLaneChange();
     // 왼쪽으로 차선변경 해야하는가?
     bool tickCheckLeftChange();
+    // 오른쪽으로 차선변경 해야하는가?
+    bool tickCheckRightChange();
     // 차선변경 완료됐나?
     bool tickCheckEndLaneChange();
     // local path와 현재위치 사이가 먼가?

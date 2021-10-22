@@ -76,6 +76,9 @@ bool FrenetPath::is_valid_path(const vector<Obstacle *> obstacles) {
                     [this](int i){return abs(i) > fot_hp->max_curvature;})) {
         return false;
     }
+//    else if(is_out_of_road()){
+//        return false;
+//    }
     // collision check
     else if (is_collision(obstacles)) {
         return false;
@@ -83,6 +86,20 @@ bool FrenetPath::is_valid_path(const vector<Obstacle *> obstacles) {
     else {
         return true;
     }
+}
+
+// check whether the path is out of road
+bool FrenetPath::is_out_of_road(){
+    max_dev_idx = max_element(d.begin(), d.end()) - d.begin(); // for debug
+    min_dev_idx = min_element(d.begin(), d.end()) - d.begin(); // for debug
+    max_dev_val = d[max_dev_idx];
+    min_dev_val = d[min_dev_idx];
+
+    if(abs(max_dev_val) <= 3 && abs(min_dev_val) <= 3)
+        return false;
+    else
+        return true;
+//    return false;
 }
 
 // check path for collision with obstacles
@@ -119,7 +136,7 @@ bool FrenetPath::is_collision(const vector<Obstacle *> obstacles) {
             // within COLLISION_CHECK_THRESHOLD of waypoint
             if(closest <= obstacle->min_distance_to_path){
                 obstacle->min_distance_to_path = closest;
-                tmp = closest; // for debug
+                closest_dis_to_obs = closest; // for debug
             }
             if (closest <= SAFETY_DISTANCE_THRESHOLD){
                 return true;

@@ -4,19 +4,19 @@
 using namespace std;
 
 FrenetHyperparameters frenet_path_hp = {
-    20.0, //max_speed
+    100.0, //max_speed
     5.0, //max_accel
-    15.0, //max_curvature
-    0.0, //max_road_width_l (float): maximum road width to the left [m]
-    5.0, //max_road_width_r (float): maximum road width to the right [m]
+    30.0, //max_curvature
+    2.5, //max_road_width_l (float): maximum road width to the left [m]
+    2.5, //max_road_width_r (float): maximum road width to the right [m]
     0.5, //d_road_w (float): road width sampling discretization [m]
     0.1, //dt(float): road width sampling discretization [m]
-    12.0, //maxt (float): max prediction horizon [s]
+    10.0, //maxt (float): max prediction horizon [s]
     9.0, //mint (float): min prediction horizon [s]
     1, //d_t_s (float): target speed sampling discretization [m/s]
     1.0, //n_s_sample (float): sampling number of target speed
     1.0, //obstacle_clearance (float): obstacle radius [m]
-    0.5, //kd (float): positional deviation cost
+    1, //kd (float): positional deviation cost
     0.1, //kv (float): velocity cost
     0.1, //ka (float): acceleration cost
     0.1, //kj (float): acceleration cost
@@ -35,6 +35,7 @@ FrenetOptimalTrajectory::FrenetOptimalTrajectory(ros::NodeHandle &nh){
     frenet_path_pub = nh.advertise<sensor_msgs::PointCloud2>("/core/frenet/_path", 1);
     result_pub = nh.advertise<frenet_local_path::frenet_output>("/core/frenet/result",1);
     pub_path_global = nh.advertise<sensor_msgs::PointCloud2>("/frenet/input_global_path",1);
+    pub_filtered_points = nh.advertise<sensor_msgs::PointCloud2>("/frenet/filtered_path",1);
 //    nh.subscribe("", 1, &FrenetOptimalTrajectory::FrenetHyperparametersCallback, this);
 
     fot_hp = &frenet_path_hp;
@@ -88,32 +89,37 @@ void FrenetOptimalTrajectory::FrenetInitialConditionsCallback(const frenet_local
 
             obstacles_points.push_back(msg.obs_pos[i].Points);
         }
-        frenet_state = 1;//msg.frenet_state;
+        frenet_state = msg.frenet_state;
 
 
         if(global_path.empty() || msg.frenet_state == 0){
 //            global_path = msg.waypointAry;
             vector<frenet_local_path::waypoint> waypoint_list;
-            for (size_t i =0; i < msg.waypointAry.size(); i+=2){
+            for (size_t i =0; i < msg.waypointAry.size(); i+=4){
                 waypoint_list.push_back(msg.waypointAry[i]);
             }
-//            if (global_path.size() == 38)
-//                fprintf(stderr,"stop \n");
 
-            pubglobalpath();
-            fprintf(stderr, "path changed \n");
+
 
             if(!global_path.empty())
                 delete csp;
 
+//            pubglobalpath();  // frenet_path input visualize
+
             global_path = waypoint_list;
-            raw_global_path = msg.waypointAry;
+            fprintf(stderr, "path changed, global_path size : %d \n", global_path.size());
+
+//            raw_global_path = msg.waypointAry;
+//            global_path = waypoint_list;
             if (global_path.size() < 2) {
                 fprintf(stderr,"not enough waypoints \n");
                 return;
             }
 
             csp = new CubicSpline2D(global_path);
+
+            visualize_filtered_points(csp->filtered_points);
+
             is_global_changed = true;
 
         }
@@ -219,34 +225,23 @@ void FrenetOptimalTrajectory::FrenetInitialConditionsCallback(const frenet_local
         run_time *= 1e-9;
         // cout << "Planning runtime " << run_time << "\n";
 
-//        visualizePath(frenet_paths);
+//        visualizePath(all_frenet_paths);
 //        fprintf(stderr, "%d \n", best_frenet_path->x.size());
 
         if (best_frenet_path) {
-//             double min = INFINITY;
-//             size_t idx = 0;
-//             for (size_t i =0; i< raw_global_path.size()-1; i++){
-//                 double tmp = hypot(best_frenet_path->x.back()-raw_global_path[i].x,best_frenet_path->y.back()-raw_global_path[i].y);
-//                if (tmp < min)
-//                    min = tmp;
-//                    idx = i;
-//             }
-//             if (frenet_state == 1 && min < 0.1){
-//                 frenet_state = 0;
-//                 best_frenet_path->x.push_back(msg.waypointAry[idx+1].x);
-//                 best_frenet_path->y.push_back(msg.waypointAry[idx+1].y);
-//             }
+
             if (frenet_state == 1 && best_frenet_path->c_lateral_deviation <=10)
                 frenet_state = 0;
 
-            fprintf(stderr, "Sucess, runtime : %lf sec, s : %lf, frenet_state: %d, closest: %lf, size: %d, c_lateral: %lf \n", run_time, s, frenet_state, best_frenet_path->tmp, best_frenet_path->x.size(), best_frenet_path->c_lateral_deviation);
+            fprintf(stderr, " pre_frenet_state : %d ", msg.frenet_state);
+            fprintf(stderr, "Success, runtime : %lf sec, s : %lf, frenet_state: %d, closest: %lf, size: %d, c_lateral: %lf, max_dev_val : %lf , max_dev_idx: %d, min_dev_val : %lf, min_dev_idx: %d, distance : %lf \n", run_time, s, frenet_state, best_frenet_path->closest_dis_to_obs, best_frenet_path->x.size(), best_frenet_path->c_lateral_deviation, best_frenet_path->max_dev_val, best_frenet_path->max_dev_idx, best_frenet_path->min_dev_val, best_frenet_path->min_dev_idx,distance);
 //            if (best_frenet_path->tmp < 4)
 //                best_frenet_path->is_valid_path(obstacles);
-
-            pubFrenetPath();
+            if ( frenet_state == 1)
+                pubFrenetPath();
 //             visualizePath();
-//             visualizePath(frenet_paths);
-
+//            visualizePath(frenet_paths);
+//            visualizePath(all_frenet_paths);
 //                if (fp->s[0]<s)
 //                    fprintf(stderr,"%.1lf , bfp_idx : %d \n",fp->s[0], bfp_idx);
 
@@ -254,7 +249,7 @@ void FrenetOptimalTrajectory::FrenetInitialConditionsCallback(const frenet_local
 //            for (int i =0; best_frenet_path->x.size();i++){
 //                fprintf(stderr, "x : %lf",best_frenet_path->x[i]);
 //            }
-//            fprintf(stderr,"\n");
+//            fprintf(stderr," \n");
 //            for (int i =0; best_frenet_path->x.size();i++){
 //                fprintf(stderr, "y : %lf",best_frenet_path->y[i]);
 //            }
@@ -302,6 +297,7 @@ void FrenetOptimalTrajectory::pubFrenetPath(){
 
 void FrenetOptimalTrajectory::resetParam(){
     frenet_paths.clear();
+    all_frenet_paths.clear();
     llx.clear();
     lly.clear();
     urx.clear();
@@ -332,6 +328,8 @@ void FrenetOptimalTrajectory::visualizePath(const vector<FrenetPath *> frenet_pa
     pcl::PointXYZI p;
     for (size_t i = 0; i< frenet_paths.size(); i++){
         for (size_t j = 0; j< frenet_paths[i]->x.size(); j++){
+            if (frenet_paths[i]->x.size()>10000) // for all_frenet_paths visualize debug
+                break;
             p.x = frenet_paths[i]->x[j];
             p.y = frenet_paths[i]->y[j];
             p.z = 0;
@@ -443,9 +441,6 @@ void FrenetOptimalTrajectory::calc_frenet_paths(int start_di_index,
             QuinticPolynomial lat_qp = QuinticPolynomial(
                 fot_ic->c_d, fot_ic->c_d_d, fot_ic->c_d_dd, di, 0.0, 0.0, ti);
 
-            QuinticPolynomial tmp_qp = QuinticPolynomial(
-                fot_ic->c_d, fot_ic->c_d_d, fot_ic->c_d_dd, fot_hp->max_road_width_r, 0.0, 0.0, fot_hp->maxt);
-            double tmp = tmp_qp.calc_point(fot_hp->maxt);
 
 //            if (tmp <  -1 || tmp > 10)
 //                break;
@@ -453,12 +448,13 @@ void FrenetOptimalTrajectory::calc_frenet_paths(int start_di_index,
             // construct frenet path
             t = 0;
             while (t <= ti) {
+                double fp_d = lat_qp.calc_point(t);
                 fp->t.push_back(t);
-                fp->d.push_back(lat_qp.calc_point(t));
+                fp->d.push_back(fp_d);
                 fp->d_d.push_back(lat_qp.calc_first_derivative(t));
                 fp->d_dd.push_back(lat_qp.calc_second_derivative(t));
                 fp->d_ddd.push_back(lat_qp.calc_third_derivative(t));
-                lateral_deviation += abs(lat_qp.calc_point(t));
+                lateral_deviation += abs(fp_d);
                 lateral_velocity += abs(lat_qp.calc_first_derivative(t));
                 lateral_acceleration += abs(lat_qp.calc_second_derivative(t));
                 lateral_jerk += abs(lat_qp.calc_third_derivative(t));
@@ -509,6 +505,7 @@ void FrenetOptimalTrajectory::calc_frenet_paths(int start_di_index,
 //                visualizePath(tfp);
 //                if (flag)
 //                    visualizePath(tfp);
+                all_frenet_paths.push_back(tfp);
                 bool valid_path = tfp->is_valid_path(obstacles);
                 // auto end = chrono::high_resolution_clock::now();
                 // valid_path_time +=
@@ -578,6 +575,7 @@ void FrenetOptimalTrajectory::calc_frenet_paths(int start_di_index,
 
         di += fot_hp->d_road_w;
     }
+
     // valid_path_time *= 1e-6;
     // cout << "NUM THREADS = " << fot_hp->num_threads << "\n"; // check if
     // Thread argument is passed down cout << "Found " << frenet_paths.size() <<
@@ -618,5 +616,24 @@ void FrenetOptimalTrajectory::pubglobalpath(){
     pcl::toROSMsg(tmp, output);
     output.header.frame_id = "world";
     pub_path_global.publish(output);
+
+}
+
+void FrenetOptimalTrajectory::visualize_filtered_points(const vector<vector<double>> filtered_points){
+
+    pcl::PointCloud<pcl::PointXYZI> tmp;
+    pcl::PointXYZI p;
+    for (size_t i = 0; i< filtered_points[0].size(); i++){
+        p.x = filtered_points[0][i];
+        p.y = filtered_points[1][i];
+        p.z = 0;
+        p.intensity = 0;
+        tmp.push_back(p);
+    }
+
+    sensor_msgs::PointCloud2 output;
+    pcl::toROSMsg(tmp, output);
+    output.header.frame_id = "world";
+    pub_filtered_points.publish(output);
 
 }

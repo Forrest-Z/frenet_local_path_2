@@ -5,6 +5,7 @@
 #include <numeric>
 #include <cmath>
 
+
 using namespace std;
 
 // Default constructor
@@ -15,11 +16,14 @@ CubicSpline2D::CubicSpline2D() = default;
 //                             const vector<double> &y) {
 CubicSpline2D::CubicSpline2D(const vector<frenet_local_path::waypoint> &global_path) {
 
-    vector<vector<double>> filtered_points = remove_collinear_points(global_path);
+    filtered_points = remove_collinear_points(global_path);
     calc_s(filtered_points[0], filtered_points[1]); // filtered_points[0] : filtered_global_path's x , filtered_points[1] : filtered_global_path's y
     sx = CubicSpline1D(s, filtered_points[0]);
     sy = CubicSpline1D(s, filtered_points[1]);
 }
+
+
+
 
 // Calculate the s values for interpolation given x, y
 void CubicSpline2D::calc_s(const vector<double>& x,
@@ -123,5 +127,5 @@ bool CubicSpline2D::are_collinear(double x1, double y1, double x2, double y2,
     double a = x1 * (y2 - y3) +
                x2 * (y3 - y1) +
                x3 * (y1 - y2);
-    return a <= 0.01;
+    return abs(a) <= 1.0e-2; // this value smaller -> bigger filtered points
 }

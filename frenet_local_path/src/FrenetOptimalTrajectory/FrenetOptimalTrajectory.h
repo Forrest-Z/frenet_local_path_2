@@ -61,6 +61,7 @@ private:
     ros::Publisher frenet_path_pub;
     ros::Publisher result_pub;
     ros::Publisher pub_path_global;
+    ros::Publisher pub_filtered_points;
     FrenetInitialConditions *fot_ic;
     FrenetHyperparameters *fot_hp;
     bool flag ; //for debug
@@ -77,6 +78,7 @@ private:
     vector<frenet_local_path::waypoint> global_path;
     vector<frenet_local_path::waypoint> raw_global_path;
     vector<FrenetPath *> frenet_paths;
+    vector<FrenetPath *> all_frenet_paths;
     void calc_frenet_paths(int start_di_index, int end_di_index,
                            bool multithreaded);
     void threaded_calc_all_frenet_paths();
@@ -95,6 +97,7 @@ public:
     void pubFrenetPath();
     bool isSamePath(vector<frenet_local_path::waypoint> &global_path, const vector<frenet_local_path::waypoint> &msg_path);
     void pubglobalpath();
+    void visualize_filtered_points(const vector<vector<double>> filtered_points);
 };
 
 #endif // FRENET_OPTIMAL_TRAJECTORY_FRENET_OPTIMAL_TRAJECTORY_H

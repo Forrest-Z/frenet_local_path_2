@@ -117,7 +117,6 @@ void CoreControl::get_frenet_path()
         }
         msg.obs_pos.push_back(tmp);
     }
-    WayPointIndex idx = local_path.getIndex();
 
     msg.cur_speed = vehicle_data.getSpeedDouble() / 3.6; // m/s
     msg.target_speed = vehicle_data.getSpeedDouble() / 3.6;
@@ -139,8 +138,11 @@ void CoreControl::get_frenet_path()
     }
 
     msg.frenet_state = local_path.frenet_state;
+    fprintf(stderr, "[pub frenet state] : %d \n", local_path.frenet_state);
 //    if (local_path.path_local.size() ==0)
 //        msg.frenet_state = 0;
+    if (path_local.size() <50)
+        fprintf(stderr, "stop here \n");
     pub_frenet_state.publish(msg);
 }
 
@@ -159,9 +161,19 @@ void CoreControl::callbackfrenetpath(const core_map::frenet_output &msg){
 //    }
 
 //    frenet_path = msg;
-    local_path.setFrenetPath(frenet_path);
-    if (local_path.frenet_state == 1 && msg.frenet_state ==0)
+
+    local_path.setFrenetPath(frenet_path); // frenet path update
+    double time = (local_path.frenet_time - local_path.frenet_start).toSec();
+//    fprintf(stderr,"ppppppp time : %lf \n", time);
+    if (local_path.frenet_state == 1 && msg.frenet_state == 0 && time >= 0.1){
+
+        local_path.pre_frenet_state = local_path.frenet_state;
         local_path.frenet_state = 0; // 0 :initial  , 1: changing
+    }
+    else if (local_path.frenet_state == 0 && msg.frenet_state == 1) // for debug
+        fprintf(stderr,"error \n");
+//    local_path.frenet_state = msg.frenet_state;
+    fprintf(stderr,"[received frenet state] : %d \n", msg.frenet_state);
 }
 
 CoreControl::~CoreControl()
@@ -180,7 +192,7 @@ void CoreControl::threadControl()
             std::unique_lock<std::mutex> lock_can(mutex_can);
             vehicle_data_tmp = vehicle_data_can;
         }
-        fprintf(stderr, "vehicle_data time: %lf", (ros::Time::now() - start).toSec());
+        // fprintf(stderr, "vehicle_data time: %lf", (ros::Time::now() - start).toSec());
 
         start = ros::Time::now();
         geometry_msgs::Pose control_pose;
@@ -188,7 +200,7 @@ void CoreControl::threadControl()
             std::unique_lock<std::mutex> lock_gps(mutex_gps_pose);
             control_pose = gps_pose;
         }
-        fprintf(stderr, "gps_pose time: %lf", (ros::Time::now() - start).toSec());
+        // fprintf(stderr, "gps_pose time: %lf", (ros::Time::now() - start).toSec());
 
         start = ros::Time::now();
         {
@@ -197,8 +209,12 @@ void CoreControl::threadControl()
             control.setCanData(vehicle_data_tmp);
             control.RunOnce();
         }
+<<<<<<< HEAD
         fprintf(stderr, "control time: %lf\n", (ros::Time::now() - start).toSec());
 
+=======
+        // fprintf(stderr, "control time: %lf\n", (ros::Time::now() - start).toSec());
+>>>>>>> cb70ffceed226fac617b72f88e071ce100795f8a
         r.sleep();
     }
 }
@@ -814,6 +830,10 @@ bool CoreControl::btCheckLeftChange()
 {
     return local_path.tickCheckLeftChange();
 }
+bool CoreControl::btCheckRightChange()
+{
+    return local_path.tickCheckRightChange();
+}
 bool CoreControl::btCheckExistPathGlobal()
 {
     if (msg_path_global.pathAry.empty())
@@ -1317,7 +1337,7 @@ bool CoreControl::btActionGenPathLaneChangeRight()
 }
 bool CoreControl::btActionGenPathLaneKeeping()
 {
-//    local_path.clearFrenetPath();
+
     get_frenet_path();
     fprintf(stderr,"pub frenet \n");
     if (local_path.genPathLaneKeeping())

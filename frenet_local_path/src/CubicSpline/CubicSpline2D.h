@@ -5,6 +5,10 @@
 #include "frenet_local_path/waypoint.h"
 #include <vector>
 
+//for debug
+#include <sensor_msgs/PointCloud2.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <ros/ros.h>
 using namespace std;
 
 // 2-dimensional cubic spline class.
@@ -13,15 +17,18 @@ class CubicSpline2D {
 public:
     CubicSpline2D();
     CubicSpline2D(const vector<frenet_local_path::waypoint> &global_path);
+    void visualize_filtered_points(const vector<vector<double>> filtered_points);
     double calc_x(double t);
     double calc_y(double t);
     double calc_curvature(double t);
     double calc_yaw(double t);
     double find_s(double x, double y, double s0);
 
+    vector<vector<double>> filtered_points;
 private:
     vector<double> s;
     CubicSpline1D sx, sy;
+
     void calc_s(const vector<double>& x,
                 const vector<double>& y);
     vector<vector<double>> remove_collinear_points(const vector<frenet_local_path::waypoint> &global_path);

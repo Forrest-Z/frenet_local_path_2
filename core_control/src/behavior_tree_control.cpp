@@ -12,6 +12,7 @@ BehaviorTreeControl::BehaviorTreeControl(ros::NodeHandle nh, std::string file_na
     factory.registerSimpleCondition("checkNearStopline", std::bind(&BehaviorTreeControl::checkNearStopLine, this));
     factory.registerSimpleCondition("checkGlobalLaneChange", std::bind(&BehaviorTreeControl::checkGlobalLaneChange, this));
     factory.registerSimpleCondition("checkLeftChange", std::bind(&BehaviorTreeControl::checkLeftChange, this));
+    factory.registerSimpleCondition("checkRightChange", std::bind(&BehaviorTreeControl::checkRightChange, this));
     factory.registerSimpleCondition("checkExistPathGlobal", std::bind(&BehaviorTreeControl::checkExistPathGlobal, this));
     factory.registerSimpleCondition("checkStateLaneKeeping", std::bind(&BehaviorTreeControl::checkStateLaneKeeping, this));
     factory.registerSimpleCondition("checkStateLaneChangeLeft", std::bind(&BehaviorTreeControl::checkStateLaneChangeLeft, this));
@@ -61,7 +62,7 @@ BehaviorTreeControl::BehaviorTreeControl(ros::NodeHandle nh, std::string file_na
     factory.registerSimpleAction("speedProfileLaneChange", std::bind(&BehaviorTreeControl::speedProfileLaneChange, this));
 
     tree = factory.createTreeFromFile(file_name);
-    printf_state = true;
+    printf_state = false;
     // static BT::StdCoutLogger logger_cout(tree);
 #ifdef ZMQ_FOUND
     // Groot Visualize
@@ -224,6 +225,22 @@ BT::NodeStatus BehaviorTreeControl::checkLeftChange()
     {
         if (printf_state)
             fprintf(stderr, "[ checkLeftChange ] false, %lf\n", (ros::Time::now() - start).toSec());
+        return BT::NodeStatus::FAILURE;
+    }
+}
+BT::NodeStatus BehaviorTreeControl::checkRightChange()
+{
+    ros::Time start = ros::Time::now();
+    if (core_control.btCheckRightChange())
+    {
+        if (printf_state)
+            fprintf(stderr, "[ checkRightChange ] true, %lf\n", (ros::Time::now() - start).toSec());
+        return BT::NodeStatus::SUCCESS;
+    }
+    else
+    {
+        if (printf_state)
+            fprintf(stderr, "[ checkRightChange ] false, %lf\n", (ros::Time::now() - start).toSec());
         return BT::NodeStatus::FAILURE;
     }
 }

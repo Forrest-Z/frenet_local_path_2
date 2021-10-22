@@ -29,6 +29,7 @@
                                         <Sequence name="">
                                             <Condition ID="checkGlobalLaneChange"/>
                                             <Fallback name="">
+<<<<<<< HEAD
                                                 <Sequence name="">
                                                     <Condition ID="checkLeftChange"/>
                                                     <Fallback name="">
@@ -62,6 +63,31 @@
                                                         </Sequence>
                                                         <Action ID="setStateLaneChangeRight"/>
                                                     </Fallback>
+=======
+                                                <Sequence name="genPathLCLeft">
+                                                    <Condition ID="checkLeftChange"/>
+                                                    <Condition ID="checkLaneChangeableLeft"/>
+                                                    <Action ID="genPathLaneChangeLeft"/>
+                                                    <Inverter>
+                                                        <Condition ID="checkObjectStaticLeftLane"/>
+                                                    </Inverter>
+                                                    <Inverter>
+                                                        <Condition ID="checkCollisionBehindLeft"/>
+                                                    </Inverter>
+                                                    <Action ID="setStateLaneChangeLeft"/>
+                                                </Sequence>
+                                                <Sequence name="genPathLCRight">
+                                                    <Condition ID="checkRightChange"/>
+                                                    <Condition ID="checkLaneChangeableRight"/>
+                                                    <Action ID="genPathLaneChangeRight"/>
+                                                    <Inverter>
+                                                        <Condition ID="checkObjectStaticRightLane"/>
+                                                    </Inverter>
+                                                    <Inverter>
+                                                        <Condition ID="checkCollisionBehindRight"/>
+                                                    </Inverter>
+                                                    <Action ID="setStateLaneChangeRight"/>
+>>>>>>> cb70ffceed226fac617b72f88e071ce100795f8a
                                                 </Sequence>
                                                 <Action ID="setStateLaneKeeping"/>
                                             </Fallback>
@@ -85,6 +111,7 @@
                                                         <Condition ID="checkProfitLaneChangeLeft"/>
                                                         <Fallback>
                                                             <Sequence name="">
+<<<<<<< HEAD
                                                                 <Fallback>
                                                                     <Condition ID="checkObjectStaticLeftLane"/>
                                                                     <Condition ID="checkIrregularLeft"/>
@@ -104,6 +131,20 @@
                                                                     </Sequence>
                                                                     <Action ID="setStateLaneChangeLeft"/>
                                                                 </Fallback>
+=======
+                                                                <Condition ID="checkLaneChangeableLeft"/>
+                                                                <Inverter>
+                                                                    <Condition ID="checkObjectStaticLeftLane"/>
+                                                                </Inverter>
+                                                                <Inverter>
+                                                                    <Condition ID="checkIrregularLeft"/>
+                                                                </Inverter>
+                                                                <Action ID="genPathLaneChangeLeft"/>
+                                                                <Inverter>
+                                                                    <Condition ID="checkCollisionBehindLeft"/>
+                                                                </Inverter>
+                                                                <Action ID="setStateLaneChangeLeft"/>
+>>>>>>> cb70ffceed226fac617b72f88e071ce100795f8a
                                                             </Sequence>
                                                             <Action ID="setStateLaneKeeping"/>
                                                         </Fallback>
@@ -112,6 +153,7 @@
                                                         <Condition ID="checkProfitLaneChangeRight"/>
                                                         <Fallback>
                                                             <Sequence>
+<<<<<<< HEAD
                                                                 <Fallback>
                                                                     <Condition ID="checkObjectStaticRightLane" name="checkObjectStaticRigtLane"/>
                                                                     <Condition ID="checkIrregularRight"/>
@@ -131,10 +173,28 @@
                                                                     </Sequence>
                                                                     <Action ID="setStateLaneChangeRight"/>
                                                                 </Fallback>
+=======
+                                                                <Condition ID="checkLaneChangeableRight"/>
+                                                                <Inverter>
+                                                                    <Condition ID="checkObjectStaticRightLane" name="checkObjectStaticRigtLane"/>
+                                                                </Inverter>
+                                                                <Inverter>
+                                                                    <Condition ID="checkIrregularRight"/>
+                                                                </Inverter>
+                                                                <Action ID="genPathLaneChangeRight"/>
+                                                                <Inverter>
+                                                                    <Condition ID="checkCollisionBehindRight"/>
+                                                                </Inverter>
+                                                                <Action ID="setStateLaneChangeRight"/>
+>>>>>>> cb70ffceed226fac617b72f88e071ce100795f8a
                                                             </Sequence>
                                                             <Action ID="setStateLaneKeeping"/>
                                                         </Fallback>
                                                     </Sequence>
+<<<<<<< HEAD
+=======
+                                                    <Action ID="setStateLaneKeeping"/>
+>>>>>>> cb70ffceed226fac617b72f88e071ce100795f8a
                                                 </Fallback>
                                             </Fallback>
                                         </Sequence>
@@ -236,6 +296,10 @@
         <Condition ID="checkPassAbleTrafficLight"/>
         <Condition ID="checkProfitLaneChangeLeft"/>
         <Condition ID="checkProfitLaneChangeRight"/>
+<<<<<<< HEAD
+=======
+        <Condition ID="checkRightChange"/>
+>>>>>>> cb70ffceed226fac617b72f88e071ce100795f8a
         <Condition ID="checkStateLaneChangeLeft"/>
         <Condition ID="checkStateLaneChangeRight"/>
         <Condition ID="checkStateLaneKeeping"/>

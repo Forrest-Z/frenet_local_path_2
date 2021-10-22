@@ -15,6 +15,11 @@ using namespace Eigen;
 
 class FrenetPath {
 public:
+    size_t max_dev_idx; // for debug
+    size_t min_dev_idx; // for debug
+    double max_dev_val;
+    double min_dev_val;
+
     // Frenet attributes
     vector<double> t;          // time
     vector<double> d;          // lateral offset
@@ -59,11 +64,13 @@ public:
     // final cost
     double cf = 0.0;
 
-    double tmp = 9999;
+    double closest_dis_to_obs = 9999;
+
 
     FrenetPath(FrenetHyperparameters *fot_hp_);
     bool to_global_path(CubicSpline2D* csp);
     bool is_valid_path(const vector<Obstacle *> obstacles);
+    bool is_out_of_road();
     bool is_collision(const vector<Obstacle *> obstacles);
     double inverse_distance_to_obstacles(
         const vector<Obstacle *> obstacles);
