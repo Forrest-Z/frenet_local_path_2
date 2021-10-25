@@ -192,7 +192,7 @@ void CoreControl::threadControl()
             std::unique_lock<std::mutex> lock_can(mutex_can);
             vehicle_data_tmp = vehicle_data_can;
         }
-        // fprintf(stderr, "vehicle_data time: %lf", (ros::Time::now() - start).toSec());
+        fprintf(stderr, "vehicle_data time: %lf", (ros::Time::now() - start).toSec());
 
         start = ros::Time::now();
         geometry_msgs::Pose control_pose;
@@ -200,7 +200,7 @@ void CoreControl::threadControl()
             std::unique_lock<std::mutex> lock_gps(mutex_gps_pose);
             control_pose = gps_pose;
         }
-        // fprintf(stderr, "gps_pose time: %lf", (ros::Time::now() - start).toSec());
+        fprintf(stderr, "gps_pose time: %lf", (ros::Time::now() - start).toSec());
 
         start = ros::Time::now();
         {
@@ -209,12 +209,8 @@ void CoreControl::threadControl()
             control.setCanData(vehicle_data_tmp);
             control.RunOnce();
         }
-<<<<<<< HEAD
         fprintf(stderr, "control time: %lf\n", (ros::Time::now() - start).toSec());
 
-=======
-        // fprintf(stderr, "control time: %lf\n", (ros::Time::now() - start).toSec());
->>>>>>> cb70ffceed226fac617b72f88e071ce100795f8a
         r.sleep();
     }
 }
@@ -829,10 +825,6 @@ bool CoreControl::btCheckGlobalLaneChange()
 bool CoreControl::btCheckLeftChange()
 {
     return local_path.tickCheckLeftChange();
-}
-bool CoreControl::btCheckRightChange()
-{
-    return local_path.tickCheckRightChange();
 }
 bool CoreControl::btCheckExistPathGlobal()
 {

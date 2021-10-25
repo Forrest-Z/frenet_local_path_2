@@ -346,7 +346,6 @@ public:
     bool btCheckPassAbleTrafficLight();
     bool btCheckGlobalLaneChange();
     bool btCheckLeftChange();
-    bool btCheckRightChange();
     bool btCheckExistPathGlobal();
     // 차선유지 state 체크
     bool btCheckStateLaneKeeping();

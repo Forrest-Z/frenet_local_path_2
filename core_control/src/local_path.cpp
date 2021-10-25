@@ -741,7 +741,7 @@ WayPointIndex LocalPath::findSideLanePoint(const WayPointIndex &idx, const bool 
     double min_dis = DBL_MAX;
     if (!isValidIndex(side_lane_idx))
     {
-        // fprintf(stderr, "not_exist_side_lane\n");
+        fprintf(stderr, "not_exist_side_lane\n");
         WayPointIndex not_exist_side_lane;
         return not_exist_side_lane;
     }
@@ -1402,26 +1402,6 @@ bool LocalPath::tickCheckLeftChange()
     //     return true;
     // else
     //     return false;
-}
-bool LocalPath::tickCheckRightChange()
-{
-        // 차선변경하는 곳이 아닐 때
-    if (getPath(idx_curr_path).dst == -1)
-    {
-        // src와 현재 차선이 다르면 차선 복귀.
-        if (idx_curr_path.link < getPath(idx_curr_path).src)
-            return true;
-        else
-            return false;
-    }
-    else
-    {
-        // 차선변경해야하는 부분에서 차선변경
-        if (idx_curr_path.link < getPath(idx_curr_path).dst)
-            return true;
-        else
-            return false;
-    }
 }
 bool LocalPath::tickCheckEndLaneChange()
 {

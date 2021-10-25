@@ -320,8 +320,6 @@ public:
     bool tickCheckGlobalLaneChange();
     // 왼쪽으로 차선변경 해야하는가?
     bool tickCheckLeftChange();
-    // 오른쪽으로 차선변경 해야하는가?
-    bool tickCheckRightChange();
     // 차선변경 완료됐나?
     bool tickCheckEndLaneChange();
     // local path와 현재위치 사이가 먼가?
